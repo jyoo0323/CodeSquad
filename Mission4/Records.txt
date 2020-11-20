@@ -1,0 +1,10 @@
+Kakao
+R;2020/11/01;5000000;Salary;null
+C;2020/11/05;30000;Gym;Credit
+C;2020/11/06;70000;Protein Powder;Credit
+}}
+BHC
+R;2020/11/11;500000000;Annual Chicken Day;null
+C;2020/11/11;10000000;Raw chicken;Cash
+C;2020/11/11;1000000000;Ingredients;Credit
+}}
