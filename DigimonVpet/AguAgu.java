@@ -3,21 +3,17 @@ package DigimonVpet;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-/*Virtual pet game!
-추억의 디지몬 다마고찌를 구현하는중.
-incompleted:
-    buttons(actionListener)
-* */
-public class DigimonVpet extends Frame{
+
+public class AguAgu extends Frame{
     Image[] AgumonMoving = new Image[4];
-    public static int posx;
-    public static int posy;
+    public static int posx = 107;
+    public static int posy = 52;
     Toolkit tk =Toolkit.getDefaultToolkit();;
     String turn = "standing";
     int num = 0;
     int ten = 5;
 
-    public DigimonVpet(){
+    public AguAgu(){
         super("Digimon Virtual Pet");
         setSize(300,200);
         setVisible(true);
@@ -77,27 +73,13 @@ public class DigimonVpet extends Frame{
         AgumonMoving[1] = tk.getImage("D:\\Desktop\\Classes\\코드스쿼드\\Week4\\src\\DigimonVpet\\Agumon\\Handmade\\seated.gif");
         AgumonMoving[2] = tk.getImage("D:\\Desktop\\Classes\\코드스쿼드\\Week4\\src\\DigimonVpet\\Agumon\\Handmade\\ref_standing.gif");
         AgumonMoving[3] = tk.getImage("D:\\Desktop\\Classes\\코드스쿼드\\Week4\\src\\DigimonVpet\\Agumon\\Handmade\\ref_seated.gif");
-        posx = 102;
-        posy = 52;
+
         movement();
     }
 
 
     public void paint(Graphics g) {
-        if(num > 1){num = 0;}
-        if(num == 0 && ten > 0){
-            g.drawImage(AgumonMoving[0], posx,posy,this);
-        }
-        if(num == 1 && ten > 0){
-            g.drawImage(AgumonMoving[1], posx,posy,this);
-        }
-        if(num == 0 && ten < 0){
-            g.drawImage(AgumonMoving[2], posx,posy,this);
-        }
-        if(num == 1 && ten < 0){
-            g.drawImage(AgumonMoving[3], posx,posy,this);
-        }
-        num++;
+        g.drawImage(AgumonMoving[num], posx, posy, this);
     }
 
     /*현제의 문제점:
@@ -106,6 +88,7 @@ public class DigimonVpet extends Frame{
         2. 순간순간 끊기는 부분이 존재함
         3. 추가할 동작 많음
     * */
+
     void movement(){
         while(true){
             if (posx <= 0 || posx >= 220){
@@ -113,24 +96,44 @@ public class DigimonVpet extends Frame{
             }
             try {
                 if(turn.equals("standing")){
-                    posx -= ten;
-                    System.out.println(turn +" "+ posx);
-                    turn = "seated";
-                    repaint();
+                    if(ten > 0){
+                        posx -= ten;
+                        num = 0;
+                        System.out.println(turn +" "+ posx);
+                        turn = "seated";
+                        update();
+                    }
+                    if(ten < 0){
+                        posx -= ten;
+                        num = 2;
+                        System.out.println(turn +" "+ posx);
+                        turn = "seated";
+                        update();
+                    }
                 }
-                Thread.sleep(1500);
+                Thread.sleep(500);
             }
             catch(InterruptedException e){
                 e.printStackTrace();
             }
             try {
                 if(turn.equals("seated")){
-                    posx -= ten;
-                    System.out.println(turn +" "+ posx);
-                    turn = "standing";
-                    repaint();
+                    if(ten > 0){
+                        posx -= ten;
+                        num = 1;
+                        System.out.println(turn +" "+ posx);
+                        turn = "standing";
+                        update();
+                    }
+                    if(ten < 0){
+                        posx -= ten;
+                        num = 3;
+                        System.out.println(turn +" "+ posx);
+                        turn = "standing";
+                        update();
+                    }
                 }
-                Thread.sleep(1500);
+                Thread.sleep(500);
             }
             catch(InterruptedException e){
                 e.printStackTrace();
@@ -138,7 +141,12 @@ public class DigimonVpet extends Frame{
 
         }
     }
+
+    public void update(){
+        repaint();
+    }
     public static void main(String[] args) {
-        DigimonVpet Agumon = new DigimonVpet();
+        AguAgu Agumon = new AguAgu();
     }
 }
+

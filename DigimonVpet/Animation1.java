@@ -57,7 +57,7 @@ public class Animation1 extends Frame{
 
             try{
 
-                Thread.sleep(10000);
+                Thread.sleep(10000000);
 
                 ani.repaint();
 
