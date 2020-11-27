@@ -36,7 +36,7 @@ public class DigimonVpet extends Frame{
         b1.setSize(75,50);
         b1.setLocation(0,25);
 
-        Button b2 = new Button("Food");
+        Button b2 = new Button("Gogi");
         b2.setSize(75,50);
         b2.setLocation(75,25);
 
