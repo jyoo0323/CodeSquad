@@ -1,27 +1,39 @@
 package DigimonVpet;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-/*Virtual pet game!
-추억의 디지몬 다마고찌를 구현하는중.
-incompleted:
-    buttons(actionListener)
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+/* using cardlaout example in the AWT text given by Honux, i will make two panels for the
+buttons(one for 1~4 and the other for 5~8), and make a panel with CardLayout so that when a
+button is pressed, i can just slide to another panel and show what happens.
 * */
+
 public class DigimonVpet extends Frame{
-    Image[] AgumonMoving = new Image[4];
-    public static int posx;
-    public static int posy;
+    Image[] AgumonMoving = new Image[15];
+    String eatPath = "./src/DigimonVpet/Agumon/Handmade/Gogi/";
+    public static int posx = 107;
+    public static int posy = 77;
     Toolkit tk =Toolkit.getDefaultToolkit();;
     String turn = "standing";
     int num = 0;
-    int ten = 5;
+    int ten = 7;
+    Boolean walk = true;
+    Image img;
+    private Graphics img_g;
+    BufferedImage background;
 
     public DigimonVpet(){
         super("Digimon Virtual Pet");
-        setSize(300,200);
+        setSize(300,240);
         setVisible(true);
-        setResizable(false);
+        //setResizable(false);
         setLayout(null);
         setLocationRelativeTo(null);
         addWindowListener(new WindowAdapter() {
@@ -31,6 +43,8 @@ public class DigimonVpet extends Frame{
                 System.exit(0);
             }
         });
+        loadBackground("./src/DigimonVpet/Agumon/Handmade/bg1.jpeg");
+
 
         Button b1 = new Button("Status");
         b1.setSize(75,50);
@@ -39,6 +53,12 @@ public class DigimonVpet extends Frame{
         Button b2 = new Button("Gogi");
         b2.setSize(75,50);
         b2.setLocation(75,25);
+        b2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                eat();
+            }
+        });
 
         Button b3 = new Button("Training");
         b3.setSize(75,50);
@@ -50,19 +70,19 @@ public class DigimonVpet extends Frame{
 
         Button b5 = new Button("W.C");
         b5.setSize(75,50);
-        b5.setLocation(0,150);
+        b5.setLocation(0,190);
 
         Button b6 = new Button("Hospital");
         b6.setSize(75,50);
-        b6.setLocation(75,150);
+        b6.setLocation(75,190);
 
         Button b7 = new Button("Light");
         b7.setSize(75,50);
-        b7.setLocation(150,150);
+        b7.setLocation(150,190);
 
-        Button b8 = new Button("Beep");
+        Button b8 = new Button("History");
         b8.setSize(75,50);
-        b8.setLocation(225,150);
+        b8.setLocation(225,190);
 
         add(b1);
         add(b2);
@@ -73,72 +93,106 @@ public class DigimonVpet extends Frame{
         add(b7);
         add(b8);
 
-        AgumonMoving[0] = tk.getImage("D:\\Desktop\\Classes\\코드스쿼드\\Week4\\src\\DigimonVpet\\Agumon\\Handmade\\standing.gif");
-        AgumonMoving[1] = tk.getImage("D:\\Desktop\\Classes\\코드스쿼드\\Week4\\src\\DigimonVpet\\Agumon\\Handmade\\seated.gif");
-        AgumonMoving[2] = tk.getImage("D:\\Desktop\\Classes\\코드스쿼드\\Week4\\src\\DigimonVpet\\Agumon\\Handmade\\ref_standing.gif");
-        AgumonMoving[3] = tk.getImage("D:\\Desktop\\Classes\\코드스쿼드\\Week4\\src\\DigimonVpet\\Agumon\\Handmade\\ref_seated.gif");
-        posx = 102;
-        posy = 52;
-        movement();
+        AgumonMoving[0] = tk.getImage("./src/DigimonVpet/Agumon/Handmade/standing.gif");
+        AgumonMoving[1] = tk.getImage("./src/DigimonVpet/Agumon/Handmade/seated.gif");
+        AgumonMoving[2] = tk.getImage("./src/DigimonVpet/Agumon/Handmade/ref_standing.gif");
+        AgumonMoving[3] = tk.getImage("./src/DigimonVpet/Agumon/Handmade/ref_seated.gif");
+        AgumonMoving[4] = tk.getImage("./src/DigimonVpet/Agumon/Handmade/happy.gif");
+        AgumonMoving[5] = tk.getImage("./src/DigimonVpet/Agumon/Handmade/ref_happy.gif");
+
+        for(int i = 0; i < 9; i++){
+            AgumonMoving[i+6] = tk.getImage(eatPath + i + ".gif");
+        }
+        img = createImage(300,200);
+        if(walk){move();}
     }
 
+    private void loadBackground(String path){
+        try{
+            background = ImageIO.read(new File(path));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void paint(Graphics g) {
-        if(num > 1){num = 0;}
-        if(num == 0 && ten > 0){
-            g.drawImage(AgumonMoving[0], posx,posy,this);
-        }
-        if(num == 1 && ten > 0){
-            g.drawImage(AgumonMoving[1], posx,posy,this);
-        }
-        if(num == 0 && ten < 0){
-            g.drawImage(AgumonMoving[2], posx,posy,this);
-        }
-        if(num == 1 && ten < 0){
-            g.drawImage(AgumonMoving[3], posx,posy,this);
-        }
-        num++;
+        img_g = img.getGraphics();
+        paintComponents(img_g);
+        img_g.drawImage(background,0,-5,this);
+        img_g.drawImage(AgumonMoving[num], posx, posy,this);
+        g.drawImage(img, 0,0, this);
+
+        /*double buffering:
+            create an image and a graphics, then draw everything on the graphics then draw that image to the
+            system's(? idk how to call it) Graphic g.
+        * */
     }
 
     /*현제의 문제점:
-        1. 움직임이 한 x좌표에서 다 일어난후 이동한후에 같은 동작을 반복. 원래 목적은 1번사진 이였다가 이동하고 2번
-            사진으로 바뀌는 방식
-        2. 순간순간 끊기는 부분이 존재함
-        3. 추가할 동작 많음
+        1. 순간순간 끊기는 부분이 존재함
+                이건 호눅스 코드를 참고하여 변형했는데도 여전함
+                    더블 버퍼를 이용하니 해결된듯 했으나 여전히 같은 문제가 발생중
     * */
-    void movement(){
-        while(true){
-            if (posx <= 0 || posx >= 220){
-                ten = ten*-1;
-            }
-            try {
-                if(turn.equals("standing")){
-                    posx -= ten;
-                    System.out.println(turn +" "+ posx);
-                    turn = "seated";
-                    repaint();
-                }
-                Thread.sleep(1500);
-            }
-            catch(InterruptedException e){
-                e.printStackTrace();
-            }
-            try {
-                if(turn.equals("seated")){
-                    posx -= ten;
-                    System.out.println(turn +" "+ posx);
-                    turn = "standing";
-                    repaint();
-                }
-                Thread.sleep(1500);
-            }
-            catch(InterruptedException e){
-                e.printStackTrace();
-            }
 
+    void eat(){
+        for(int i = 6; i < 15; i++) {
+            posx = 107;
+            try {
+                num = i;
+                this.update(this.getGraphics());
+                System.out.println(num);
+                Thread.sleep(500);
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
         }
     }
+
+
+    void move() {
+        while (walk) {
+            if (posx <= 0 || posx >= 220) {
+                ten = ten * -1;
+            }
+            try {
+                if (turn.equals("standing")) {
+                    if (ten > 0) {
+                        posx -= ten;
+                        num = 0;
+                        turn = "seated";
+                        update();
+                    }
+                    if (ten < 0) {
+                        posx -= ten;
+                        num = 2;
+                        turn = "seated";
+                        update();
+                    }
+                }else{
+                    if (ten > 0) {
+                        posx -= ten;
+                        num = 1;
+                        turn = "standing";
+                        update();
+                    }
+                    if (ten < 0) {
+                        posx -= ten;
+                        num = 3;
+                        turn = "standing";
+                        update();
+                    }
+                }
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void update(){
+        repaint();
+    }
     public static void main(String[] args) {
-        DigimonVpet Agumon = new DigimonVpet();
+        new DigimonVpet();
     }
 }
