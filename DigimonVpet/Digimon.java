@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.lang.Double.valueOf;
+
 public class Digimon {
     private String name,type;
     //type: Vaccine, Data, Virus.
@@ -30,11 +32,10 @@ public class Digimon {
     public static LocalDateTime now = LocalDateTime.now();
     public static String curtime[] = dft.format(now).split(":");
     String prevTime[];
-    public static String[] sleepingTimeZone = new String[]{"22", "23", "00", "01", "02", "03",
+    public static String[] sleepingTimeZone = new String[]{"01", "02", "03",
                                                             "04", "05", "06", "07", "08"};
 
     public Digimon(List<String> data) {
-        setDigimonData(data);
         this.name = data.get(0);
         this.age = Integer.parseInt(data.get(1));
         this.type = data.get(2);
@@ -55,31 +56,27 @@ public class Digimon {
         this.resistanceToDamage = Double.parseDouble(data.get(17));
     }
 
-    public static List<String> digimonData = new ArrayList<String>();
 
-    public static void setDigimonData(List<String> data) {
-        Digimon.digimonData = data;
-    }
 
-    public static List<String> getDigimonData() {
-        return digimonData;
-    }
+
+
+
+
 
     public static void main(String[] args) {
         List<String> myDigimonData = DigimonReader.readData();
-        setDigimonData(myDigimonData);
 
         Digimon myDigimon = new Digimon(myDigimonData);
 
-        AguAgu Agumon = new AguAgu();
+        AguAgu Agumon = new AguAgu(myDigimon);
 
+        Agumon.actions("loading");
         while(true){
             Agumon.actions(myDigimon.DigimonStatus());
         }
     }
 
-    private void hungeriness(String[] time){
-
+    private void hungers(String[] time){
         setCurrentFullness(this.currentFullness - 10);
     }
 
@@ -88,7 +85,7 @@ public class Digimon {
             this.consciousness = false;
             return true;
         }
-        return true;
+        return false;
     }
 
     private String isSick(){
@@ -100,18 +97,13 @@ public class Digimon {
     }
 
     public String DigimonStatus(){
-        /*
-        * if(sleepCheck()){
+        if(sleepCheck()){
             return "sleeping";
         }
-        * */
-
-
         if(!(this.consciousness)){
             return "move";
         }
 
-        this.prevTime = curtime;
         return "move";
     }
 
@@ -160,7 +152,7 @@ public class Digimon {
     }
 
     public void setHp(int hp) {
-        this.hp = hp;
+        this.hp += hp;
     }
 
     public int getPower() {
@@ -168,7 +160,7 @@ public class Digimon {
     }
 
     public void setPower(int power) {
-        this.power = power;
+        this.power += power;
     }
 
     public int getDefense() {
@@ -176,7 +168,7 @@ public class Digimon {
     }
 
     public void setDefense(int defense) {
-        this.defense = defense;
+        this.defense += defense;
     }
 
     public int getSpeed() {
@@ -184,7 +176,7 @@ public class Digimon {
     }
 
     public void setSpeed(int speed) {
-        this.speed = speed;
+        this.speed += speed;
     }
 
     public int getCurrentFullness() {
