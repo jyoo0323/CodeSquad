@@ -1,12 +1,11 @@
 package DigimonVpet;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
-import static java.lang.Double.valueOf;
 
 public class Digimon {
     private String name,type;
@@ -24,18 +23,28 @@ public class Digimon {
     private boolean consciousness;
     //consciousness == true: digimon is awake and moving(unless illed/hurt)
     //consciousness == flase: digimon is sleeping
-    
-    private double resistanceToIllness;
-    private double resistanceToDamage;
 
-    public static DateTimeFormatter dft = DateTimeFormatter.ofPattern("HH:mm");
-    public static LocalDateTime now = LocalDateTime.now();
-    public static String curtime[] = dft.format(now).split(":");
-    String prevTime[];
-    public static String[] sleepingTimeZone = new String[]{"01", "02", "03",
+    private double resistanceToIllness;
+
+    private final DateTimeFormatter dft = DateTimeFormatter.ofPattern("HH:mm");
+    private LocalDateTime now = LocalDateTime.now();
+
+    public String[] curtime = dft.format(now).split(":");
+
+    public static String[] sleepingTimeZone = new String[]{ "02", "03",
                                                             "04", "05", "06", "07", "08"};
 
-    public Digimon(List<String> data) {
+    private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+    private Calendar cal = Calendar.getInstance();
+    private Date rightNow = new Date();
+    private Date lastPoop;
+    private Date lastEaten;
+
+    private boolean illed;
+
+    private final Random RD = new Random();
+
+    public Digimon(List<String> data) throws ParseException {
         this.name = data.get(0);
         this.age = Integer.parseInt(data.get(1));
         this.type = data.get(2);
@@ -51,19 +60,26 @@ public class Digimon {
         this.numWins = Integer.parseInt(data.get(12));
         this.numLoses = Integer.parseInt(data.get(13));
         this.numFights = Integer.parseInt(data.get(14));
-        this.consciousness = Boolean.valueOf(data.get(15));
+        this.consciousness = Boolean.parseBoolean(data.get(15));
         this.resistanceToIllness = Double.parseDouble(data.get(16));
-        this.resistanceToDamage = Double.parseDouble(data.get(17));
+        this.illed = false;
+
+        cal.add(Calendar.MINUTE, -29);
+        lastEaten = sdf.parse(sdf.format(cal.getTime()));
+        lastPoop = sdf.parse(sdf.format(cal.getTime()));
+    }
+
+    public void updateTime() throws ParseException {
+        now = LocalDateTime.now();
+        curtime = dft.format(now).split(":");
+        cal = Calendar.getInstance();
+        rightNow = sdf.parse(sdf.format(cal.getTime()));
+
     }
 
 
 
-
-
-
-
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
         List<String> myDigimonData = DigimonReader.readData();
 
         Digimon myDigimon = new Digimon(myDigimonData);
@@ -76,8 +92,14 @@ public class Digimon {
         }
     }
 
-    private void hungers(String[] time){
-        setCurrentFullness(this.currentFullness - 10);
+    private void hungers(){
+        Long differenceInTime = (this.rightNow.getTime() - lastEaten.getTime())/3600000;
+
+        if(differenceInTime >= 1){
+            lastEaten = rightNow;
+            setCurrentFullness(-10);
+        }
+
     }
 
     private Boolean sleepCheck(){
@@ -88,22 +110,38 @@ public class Digimon {
         return false;
     }
 
-    private String isSick(){
-        return "sick";
+    private void sickCheck(){
+        int a = RD.nextInt(100);
+        if((int)(1-this.getResistanceToIllness())*100 > a){
+            illed = true;
+        }
     }
 
-    public String isWounded(){
-        return "hurt";
+    private boolean poopCheck(){
+        Long differenceInTime = (this.rightNow.getTime() - lastPoop.getTime())/60000;
+        if((double)currentFullness/maxFullness > 0.3){
+            if(differenceInTime >= 30){
+                lastPoop = rightNow;
+                return true;
+            }
+        }
+        return false;
     }
 
-    public String DigimonStatus(){
+    public String DigimonStatus() throws ParseException {
+        updateTime();
         if(sleepCheck()){
             return "sleeping";
+        }else{
+            sickCheck();
+            if(illed){
+                return "sick";
+            }
+            if(poopCheck()){
+                return "poop";
+            }
         }
-        if(!(this.consciousness)){
-            return "move";
-        }
-
+        hungers();
         return "move";
     }
 
@@ -200,7 +238,7 @@ public class Digimon {
     }
 
     public void setHappiness(int happiness) {
-        this.happiness = happiness;
+        this.happiness -= happiness;
     }
 
     public int getAdventurePts() {
@@ -248,16 +286,13 @@ public class Digimon {
     }
 
     public void setResistanceToIllness(double resistanceToIllness) {
-        this.resistanceToIllness = resistanceToIllness;
+        this.resistanceToIllness -= resistanceToIllness;
     }
-
-    public double getResistanceToDamage() {
-        return resistanceToDamage;
+    public boolean getIlled() {
+        return illed;
     }
-
-    public void setResistanceToDamage(double resistanceToDamage) {
-        this.resistanceToDamage = resistanceToDamage;
+    public void setIlled(boolean illed) {
+        this.illed = illed;
     }
-
 }
 
